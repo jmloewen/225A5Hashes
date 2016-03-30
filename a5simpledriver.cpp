@@ -277,6 +277,8 @@ void HTTest()
   ht1.ListAt(0);
   ht1.LoadFactor();
   ht1.Insert(UserAccount("admin", ADMIN_));
+
+  int abcd = 5;
   ht1.Remove(UserAccount("bob", REGULAR_));
   ht1.Retrieve(UserAccount("bob", REGULAR_));
   ht1.Search(UserAccount("bob", ADMIN_));

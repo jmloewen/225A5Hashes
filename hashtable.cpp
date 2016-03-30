@@ -30,17 +30,17 @@ HashTable::HashTable()
 	//SLinkedList<UserAccount> * table = new SLinkedList<UserAccount>();
 	
 	maxsize = SmallestPrime(DEFAULTSIZE);	//by default, maxsize = the smallest prime greater than 2*n (n=101).
-	table = new SLinkedList<UserAccount>[maxsize];
+	table = new SLinkedList<UserAccount>[maxsize]();
 
-	SLinkedList<UserAccount> * temp;
+	//SLinkedList<UserAccount> * temp;
 
 	size = 0;
+
+	/*
 	for (int i = 0; i < maxsize; i++)
 	{
-		temp = new SLinkedList<UserAccount>();
-		table[i] = *temp;
-	}
-	size = 0;
+		table[i] = *(new SLinkedList<UserAccount>());
+	}*/
 }
 
 // parameterized constructor
@@ -49,7 +49,7 @@ HashTable::HashTable(int n)
 {
 	size = 0;
 	maxsize = SmallestPrime(0);
-	SLinkedList<UserAccount> * table = new SLinkedList<UserAccount>[maxsize];
+	table = new SLinkedList<UserAccount>[maxsize];
 
 	for (int i = 0; i < maxsize; i++)
 	{
@@ -97,6 +97,7 @@ bool HashTable::IsPrime(int n) const
 	{
 		return true;
 	}
+
 	if (n % 2 == 0 || n % 3 == 0)
 	{
 		return false;
@@ -154,8 +155,6 @@ bool HashTable::Insert(UserAccount acct)
 		//create the new useraccount.
 		UserAccount * newUser = new UserAccount(acct);
 		
-
-		
 		newUser->SetPassword(acct.GetPassword(), acct.GetPassword());
 
 		table[unamehash].InsertBack(*newUser);
@@ -166,8 +165,6 @@ bool HashTable::Insert(UserAccount acct)
 		return true;
 	}
 	return false;
-
-	
 
 }
 
