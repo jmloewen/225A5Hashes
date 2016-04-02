@@ -27,15 +27,11 @@ static const int DEFAULTSIZE = 101;
 // creates an array of size maxsize
 HashTable::HashTable()
 {
-	//SLinkedList<UserAccount> * table = new SLinkedList<UserAccount>();
-	
-	maxsize = SmallestPrime(DEFAULTSIZE);	//by default, maxsize = the smallest prime greater than 2*n (n=101).
-	table = new SLinkedList<UserAccount>[maxsize]();
-
-	//SLinkedList<UserAccount> * temp;
-
 	size = 0;
+	maxsize = 101;	//by default, maxsize = the smallest prime greater than 2*n (n=101).
+	table = new SLinkedList<UserAccount>[101];
 
+	
 	/*
 	for (int i = 0; i < maxsize; i++)
 	{
@@ -48,21 +44,35 @@ HashTable::HashTable()
 HashTable::HashTable(int n)
 {
 	size = 0;
-	maxsize = SmallestPrime(0);
+	maxsize = SmallestPrime(n * 2);
 	table = new SLinkedList<UserAccount>[maxsize];
 
+	/*
 	for (int i = 0; i < maxsize; i++)
 	{
-		SLinkedList<UserAccount> * temp = new SLinkedList<UserAccount>();
-		table[i] = *temp;
-	}
-
+		table[i] = *(new SLinkedList<UserAccount>());
+	}*/
+	
 }
 
 // copy constructor
 // Creates deep copy of sourceht
 HashTable::HashTable(const HashTable& sourceht)
 {
+	size = sourceht.size;	//get size, maxsize.
+	maxsize = sourceht.maxsize;
+	table = new SLinkedList<UserAccount>[maxsize];//create an array of the same size.
+	SLinkedList<UserAccount> *curList;
+	//fill this table with values from sourceht.
+
+
+	for (int i = 0; i < maxsize; i++)
+	{
+		curList = &sourceht.table[i];
+		//run copy on each linked list.
+		//idk if this works?  Maybe it will?
+		table[i] = *(new SLinkedList<UserAccount>(*curList));
+	}
 }
 
 // hash function, uses Horner's method
@@ -73,19 +83,36 @@ int HashTable::Hash(string input) const
 	for (int i = 0; i < (signed)input.length(); i++)
 	{
 		//hashval = itself + the ascii - ascii conversion * horner conversion % arraysize.
-		hashval = (hashval + ((input[i] - 96) * 32)) % maxsize;
+		hashval = (hashval + ((input[i] - 96) * 32));
 	}
-	return hashval;
+
+	return hashval % maxsize;
 }
 
 // helper function to find smallest prime number greater than supplied parameter
 int HashTable::SmallestPrime(int n) const
 {
-	int nextPrime = n * 2;
-	while (!IsPrime(nextPrime++))
+	//incrementing n guarantees that even if we're sent a prime, we'll look at the next value instead.
+	int nextPrime = n+1;
+
+	//edge cases - these must be here to make our search more efficient, and to cut out even checks.
+	if (n == 0 || n == 1 || n == 2)
 	{
+		return n+1;
 	}
-	return nextPrime - 1;
+
+	//if we're on an even number, increment it so that it's odd (no evens are primes but '2').
+	if (nextPrime % 2 == 0)
+	{
+		nextPrime++;
+	}
+
+	while (!IsPrime(nextPrime))
+	{
+		//increment nextprime by 2
+		nextPrime += 2;
+	}
+	return nextPrime;
 }
 
 //All composites between 0 and n>3 are either a multiple of 2, 3, or some factor of 6 +- 1 
@@ -103,14 +130,24 @@ bool HashTable::IsPrime(int n) const
 		return false;
 	}
 
-	for (int i = 6; i < sqrt(n); i+=6)
+	//Theorem: All primes that are not '1', '2', or '3', exist as some factor of 6 + 1 or 6 - 1.
+	//Any value that is not 1 above or below a multiple of 6 does not need to be checked.
+	//Explanation: if it is '6', or '2', or '4' * n, it is a multiple of 2 and therefore not prime.
+	//if it is '6' or '3' * n, it is a multiple of 3 and therefore not prime.
+	//therefore, the only values we need to check are the values +-1 of 6 (5 and 7, or 'remainder 1').
+	//Once we have surpassed the threshold of the sqrt of n, no values beyond sqrt of n can be a factor of n.
+	//This is because in order for it to be a factor of n, it requires a second factor to multiply by.
+	//this second value would have to be less than or equal to sqrt(n), otherwise the product would be larger than n.
+	//as a result, this value must have already been checked, and therefore does not exist (since we would have left the loop if it did).
+	//This means we can get away with checking only values up to the square root of n + 1 
+	//(the + 1to take care of potential rounding errors).
+	for (int i = 6; i < sqrt(n) + 1; i+=6)
 	{
-		if (n % (i-1) == 0 || n % (i+1) == 0)
+		if ((n % (i - 1) == 0) || (n % (i + 1) == 0))
 		{
 			return false;
 		}
 	}
-
 	return true;
 }
 
@@ -118,10 +155,46 @@ bool HashTable::IsPrime(int n) const
 // Return false if n is smaller than current array size or if n is negative.
 // Else, set array size to the smallest prime number larger than n
 //   and re-hash all contents into the new array, delete the old array and return true.
-bool Resize(int n)
+bool HashTable::Resize(int n)
 {
-	//here we want o find the next greater prime, then re-hash all existing values in accordance.
-	return false;
+	if (n < maxsize || n < 0)
+	{
+		return false;
+	}
+
+	int hashedValues = 0;
+
+	//run constructor on the new table.
+	HashTable * nuHash = new HashTable(n);
+	//we now have an empty hashtable of size prime>n*2.
+	vector<UserAccount> temp;
+	for (int i = 0; i < size; i++)
+	{
+		//dump each linked list and write its contents to the new hash table.
+
+		if ((table[i]).Size() > 0)	//if table's size is greater than 0, enter the while.
+		{
+			temp = table[i].Dump();	//point vector in the right direction.
+			temp.begin();
+			//for all values in this linked list, insert each value into our new hash table.
+			for (int j = 0; j < (signed)temp.size(); j++)
+			{
+				//UserAccount * user = new UserAccount(temp.at(j));
+				nuHash->Insert(temp.at(j));
+			}
+		}
+	}
+	//all values have been migrated at this point.
+	//reassign size.
+	nuHash->size = size;
+
+	HashTable * hashaddress = this;
+	
+	SLinkedList<UserAccount> * tempList = table;
+	table = hashaddress->table;
+	delete tempList;
+	
+	return true;
 }
 
 // destructor
@@ -153,14 +226,15 @@ bool HashTable::Insert(UserAccount acct)
 		int pwhash = Hash(acct.GetPassword());
 
 		//create the new useraccount.
-		UserAccount * newUser = new UserAccount(acct);
+		UserAccount *newUser = new UserAccount(acct);
 		
 		newUser->SetPassword(acct.GetPassword(), acct.GetPassword());
 
-		table[unamehash].InsertBack(*newUser);
-		//here is where we hash.
-		//first call the hash function, then insert at the appropriate index.
-		//int index = Hash(acct->password);
+		SLinkedList<UserAccount> * temp = &table[unamehash];
+
+		//table->InsertBack(*newUser);	//for whatever reason, this inserts.....
+		temp->InsertBack(*newUser);
+
 		size++;
 		return true;
 	}
@@ -181,7 +255,6 @@ bool HashTable::Remove(UserAccount acct)
 // Returns true if item exists, false otherwise
 bool HashTable::Search(UserAccount acct) const
 {
-
 	//call hash and get the hash value of the username.
 	int unamehash = Hash(acct.GetUsername());
 
