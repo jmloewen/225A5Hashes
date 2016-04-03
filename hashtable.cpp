@@ -30,13 +30,6 @@ HashTable::HashTable()
 	size = 0;
 	maxsize = 101;	//by default, maxsize = the smallest prime greater than 2*n (n=101).
 	table = new SLinkedList<UserAccount>[101];
-
-	
-	/*
-	for (int i = 0; i < maxsize; i++)
-	{
-		table[i] = *(new SLinkedList<UserAccount>());
-	}*/
 }
 
 // parameterized constructor
@@ -46,13 +39,6 @@ HashTable::HashTable(int n)
 	size = 0;
 	maxsize = SmallestPrime(n * 2);
 	table = new SLinkedList<UserAccount>[maxsize];
-
-	/*
-	for (int i = 0; i < maxsize; i++)
-	{
-		table[i] = *(new SLinkedList<UserAccount>());
-	}*/
-	
 }
 
 // copy constructor
@@ -162,8 +148,6 @@ bool HashTable::Resize(int n)
 		return false;
 	}
 
-	int hashedValues = 0;
-
 	//run constructor on the new table.
 	HashTable * nuHash = new HashTable(n);
 	//we now have an empty hashtable of size prime>n*2.
@@ -172,10 +156,9 @@ bool HashTable::Resize(int n)
 	{
 		//dump each linked list and write its contents to the new hash table.
 
-		if ((table[i]).Size() > 0)	//if table's size is greater than 0, enter the while.
+		if ((table[i]).Size() > 0)	//if list's size is greater than 0, enter the while.
 		{
 			temp = table[i].Dump();	//point vector in the right direction.
-			temp.begin();
 			//for all values in this linked list, insert each value into our new hash table.
 			for (int j = 0; j < (signed)temp.size(); j++)
 			{
@@ -185,14 +168,8 @@ bool HashTable::Resize(int n)
 		}
 	}
 	//all values have been migrated at this point.
-	//reassign size.
-	nuHash->size = size;
-
-	HashTable * hashaddress = this;
-	
-	SLinkedList<UserAccount> * tempList = table;
-	table = hashaddress->table;
-	delete tempList;
+	table = nuHash->table;
+	maxsize = nuHash->maxsize;
 	
 	return true;
 }
@@ -200,14 +177,26 @@ bool HashTable::Resize(int n)
 // destructor
 HashTable::~HashTable()
 {
-//	delete table;
-	//delete every array entry individually if it is non-null.
+	for (int i = 0; i < maxsize; i++)
+	{
+		table[i].RemoveAll();
+	}
+	size = 0;
+	maxsize = 0;
 }
 
 // overloaded assignment operator
 HashTable& HashTable::operator=(const HashTable& sourceht)
 {
-	return *this;
+	if (this == &sourceht)
+	{
+		return *this;
+	}
+	//create a new hash table and copy over the values.
+	HashTable * nuHash = new HashTable(sourceht);
+	nuHash->maxsize = sourceht.MaxSize();
+	nuHash->size = sourceht.Size();
+	return *nuHash;
 }
 
 // Insertion
@@ -221,19 +210,19 @@ bool HashTable::Insert(UserAccount acct)
 	//if search returns false (the item doesnt exist), enter.  else, return false.
 	if (!Search(acct))
 	{
+		if (LoadFactor() > (double)2/3)
+		{
+			Resize(maxsize);
+		}
 		//hash the username, then search for that hash - if that hash does not exist, hash the password and insert the useraccount into the array.
 		int unamehash = Hash(acct.GetUsername());
-		int pwhash = Hash(acct.GetPassword());
 
 		//create the new useraccount.
 		UserAccount *newUser = new UserAccount(acct);
-		
 		newUser->SetPassword(acct.GetPassword(), acct.GetPassword());
+		newUser->SetUserLevel(acct.GetUserLevel());
 
-		SLinkedList<UserAccount> * temp = &table[unamehash];
-
-		//table->InsertBack(*newUser);	//for whatever reason, this inserts.....
-		temp->InsertBack(*newUser);
+		table[unamehash].InsertBack(*newUser);
 
 		size++;
 		return true;
@@ -247,8 +236,16 @@ bool HashTable::Insert(UserAccount acct)
 //   otherwise returns false
 bool HashTable::Remove(UserAccount acct)
 {
-	//search and then remove at the appropriate index.	
-	return false;
+	if (!Search(acct))
+	{
+		return false;
+	}
+	//get the hash location.
+	int unamehash = Hash(acct.GetUsername());
+	//remove the user from the appropriate linked list.
+	table[unamehash].Remove(acct);
+	size--;
+	return true;
 }
 
 // Search
@@ -258,21 +255,8 @@ bool HashTable::Search(UserAccount acct) const
 	//call hash and get the hash value of the username.
 	int unamehash = Hash(acct.GetUsername());
 
-	//search the array of linked lists for unamehash.
-	//look at all entries in the array.
-	bool containsval = false;
-	for (int i = 0; i < size; i++)
-	{
-		//iterate through all items in the designated linked list.
-		containsval = table[i].Contains(acct);
-		if (containsval)
-		{
-			return true;
-		}
-	}
-
-
-	return false;
+	bool containsval = table[unamehash].Contains(acct);
+	return containsval;
 }
 
 // Retrieval
@@ -280,7 +264,9 @@ bool HashTable::Search(UserAccount acct) const
 //   if a matching parameter is found, otherwise return NULL
 UserAccount* HashTable::Retrieve(UserAccount acct)
 {
-	return NULL;
+	//this is simple - hash the account, go to that linked list and return the retrieved value.
+	int unamehash = Hash(acct.GetUsername());
+	return table[unamehash].Retrieve(acct);
 }
 
 // Returns the number of items stored in the hash table
@@ -299,5 +285,5 @@ int HashTable::MaxSize() const
 // Note that due to separate chaining, load factor can be > 1.
 double HashTable::LoadFactor() const
 {
-	return double(size/maxsize);
+	return (double)size/maxsize;
 }

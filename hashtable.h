@@ -18,7 +18,7 @@ using namespace std;
 class HashTable
 {
   private:
-    SLinkedList<UserAccount>* table;  // array of separately chained binary search trees
+    SLinkedList<UserAccount>* table;  //array of separately chained linked lists.
     int size;    // number of items stored
     int maxsize; // size of underlying array
 

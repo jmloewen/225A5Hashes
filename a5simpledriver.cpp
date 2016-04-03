@@ -266,23 +266,58 @@ void LLTest()
   lla.Size();
   SLinkedList<int> llb(lla);
   SLinkedList<int> llc = lla;
+  int tempval = 5;
 }
 
 void HTTest()
 {
   HashTable ht1;
-  HashTable ht2(100);
+  HashTable ht2(5);
+
+  /*
+
   ht1.Size();
   ht1.MaxSize();
   ht1.ListAt(0);
-  ht1.LoadFactor();
+  double lf1 = ht1.LoadFactor();
   ht1.Insert(UserAccount("admin", ADMIN_));
 
+  //bool temp = ht1.table[100].Contains(UserAccount("admin", ADMIN_));
+  double lf2 = ht1.LoadFactor();
   int abcd = 5;
   ht1.Remove(UserAccount("bob", REGULAR_));
   ht1.Retrieve(UserAccount("bob", REGULAR_));
   ht1.Search(UserAccount("bob", ADMIN_));
   HashTable ht3 = ht1;
+  */
 
-  int temp = 3;
+  ht2.Insert(UserAccount("admin", ADMIN_));
+  ht2.Insert(UserAccount("joe", ADMIN_));
+  ht2.Insert(UserAccount("bobby", ADMIN_));
+  ht2.Insert(UserAccount("trisha", ADMIN_));
+  ht2.Insert(UserAccount("genevieve", ADMIN_));
+  ht2.Insert(UserAccount("arnold", ADMIN_));
+  ht2.Insert(UserAccount("ahnuld", ADMIN_));
+  ht2.Insert(UserAccount("brenda", ADMIN_));
+  ht2.Insert(UserAccount("boris", ADMIN_));
+  ht2.Insert(UserAccount("monica", ADMIN_));
+  bool temp = ht2.Search(UserAccount("admin", ADMIN_));
+  bool temp2 = ht2.Search(UserAccount("boris", ADMIN_));
+  bool temp3 = ht2.Search(UserAccount("monica", ADMIN_));
+  ht2.Insert(UserAccount("marizona", ADMIN_));
+  ht2.Insert(UserAccount("mario", ADMIN_));
+  ht2.Insert(UserAccount("luigi", ADMIN_));
+  ht2.Insert(UserAccount("bowser", ADMIN_));
+  ht2.Insert(UserAccount("peach", ADMIN_));
+  ht2.Insert(UserAccount("waluigi", ADMIN_));
+  ht2.Insert(UserAccount("wario", ADMIN_));
+  ht2.Insert(UserAccount("toad", ADMIN_));
+  ht2.Insert(UserAccount("toadette", ADMIN_));
+  ht2.Insert(UserAccount("yoshi", ADMIN_));
+  ht2.Insert(UserAccount("boshi", ADMIN_));
+  ht2.Remove(UserAccount("boshi", ADMIN_));
+  bool temp10 = ht2.Search(UserAccount("boshi", ADMIN_));
+
+
+  int temp15 = 3;
 }

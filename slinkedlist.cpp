@@ -90,7 +90,7 @@ void SLinkedList<T>::DeleteList()
 template <class T>
 SLinkedList<T>::~SLinkedList()
 {
-	if (size > 0)
+	/*if (size > 0)
 	{
 		//currently seems broken somehow.
 		Node<T> * curNode = front;
@@ -104,7 +104,11 @@ SLinkedList<T>::~SLinkedList()
 		front = NULL;
 		back = NULL;
 		size = 0;
-	}
+	}*/
+	RemoveAll();
+	front = NULL;
+	back = NULL;
+	size = 0;
 }
 
 // MUTATORS
@@ -255,7 +259,7 @@ bool SLinkedList<T>::Contains(T item) const
 	Node<T> * temp = front;
 
 	//temp is not null, and there exists a next item.
-	while (temp->next != NULL)
+	while (temp != NULL)
 	{
 		if (temp->data == item)
 		{
@@ -296,16 +300,16 @@ T* SLinkedList<T>::Retrieve(T item)
 template <class T>
 vector<T> SLinkedList<T>::Dump() const
 {
-	vector<T> abc;
+	vector<T> retvec;
 	Node<T> * cur = front;
 
 	for (int i = 0; i < size; i++)
 	{
-		abc.push_back(cur->data);
+		retvec.push_back(cur->data);
 		cur = cur->next;
 	}
 
-	return abc;
+	return retvec;
 }
 
 // OVERLOADED OPERATORS
@@ -320,8 +324,7 @@ SLinkedList<T>& SLinkedList<T>::operator=(const SLinkedList<T>& ll)
 	{
 		return *this;
 	}
-	//create a
-
+	//create a new list with identical values.
 	SLinkedList<T> * temp = new SLinkedList<T>(ll);
 	front = temp->front;
 	back = temp->back;
