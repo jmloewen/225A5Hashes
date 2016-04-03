@@ -1,7 +1,9 @@
 // File:        slinkedlist.h
-// Author:      Geoffrey Tien
+// Author:      Jonathan Loewen
 // Date:        March 26, 2016
 // Description: Definition of a template singly-linked-list class for CMPT 225 assignment 5
+//Principal coding on March 26th-27th, 2016.
+//Final fixes to Insertion and resize on April 2nd-3rd 2016.
 
 #ifdef _SLINKEDLIST_H_
 

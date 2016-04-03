@@ -1,8 +1,10 @@
 // File:        hashtable.h
-// Author:      Geoffrey Tien
+// Author:      Jonathan Loewen
 // Date:        March 25, 2016
 // Description: Definition of a hash table class for CMPT 225 assignment 5
 //              must include hashtableprivate.h file for additional private member functions added by student
+//Principal coding on March 26th-27th, 2016.
+//Final fixes to Insertion and resize on April 2nd-3rd 2016.
 
 #pragma once
 
