@@ -4,6 +4,7 @@
 // Description: Definition of a template singly-linked-list class for CMPT 225 assignment 5
 //Principal coding on March 26th-27th, 2016.
 //Final fixes to Insertion and resize on April 2nd-3rd 2016.
+//Final Commenting on April 3rd, 2016.
 
 #ifdef _SLINKEDLIST_H_
 
@@ -12,10 +13,6 @@
 #include <vector>
 
 using namespace std;
-
-//a slinkedlistcontains a node pointer to 'front', 'back', and an integer 'size'.
-//a node contains 'data' of type Template and a pointer to the 'next' node.
-
 
 // default constructor
 template <class T>
@@ -37,7 +34,7 @@ SLinkedList<T>::SLinkedList(const SLinkedList<T>& ll)
 		size = 0;
 		return;
 	}
-	//here, size > 0.
+	//if we're here, size > 0 on the sent LL.
 	size = ll.Size();
 	CopyList(ll);
 }
@@ -48,7 +45,7 @@ template <class T>
 void SLinkedList<T>::CopyList(const SLinkedList<T>& ll)
 {
 
-	Node<T> * temp = new Node<T>(ll.front->data);
+	Node<T> * temp = new Node<T>(ll.front->data);	//instantiate a node.
 	Node<T> * dpr = ll.front->next;	//dpr/datapointer points to the next value.
 	front = temp;
 	back = temp;	//this is required here in case we only have one value in the LL.
@@ -60,7 +57,6 @@ void SLinkedList<T>::CopyList(const SLinkedList<T>& ll)
 		back = temp;
 		dpr = dpr->next;
 	}
-	//front, back, and size are all now set.  We're done.
 }
 
 // helper function for deep delete
@@ -92,22 +88,7 @@ void SLinkedList<T>::DeleteList()
 template <class T>
 SLinkedList<T>::~SLinkedList()
 {
-	/*if (size > 0)
-	{
-		//currently seems broken somehow.
-		Node<T> * curNode = front;
-		Node<T> * tempNode = front;
-		while (curNode != NULL)
-		{
-			tempNode = tempNode->next;
-			delete curNode;
-			curNode = tempNode;
-		}
-		front = NULL;
-		back = NULL;
-		size = 0;
-	}*/
-	RemoveAll();
+	RemoveAll();	//call remove function, null out values.
 	front = NULL;
 	back = NULL;
 	size = 0;
@@ -121,6 +102,7 @@ SLinkedList<T>::~SLinkedList()
 template <class T>
 void SLinkedList<T>::InsertFront(T item)
 {
+	//instantiate a node.
 	Node<T> * newNode = new Node<T>(item);
 
 	if (size == 0)
@@ -128,6 +110,7 @@ void SLinkedList<T>::InsertFront(T item)
 		back = newNode;
 	}
 
+	//put the node into position and increment.
 	newNode->next = front;
 	front = newNode;
 	size++;
@@ -139,18 +122,19 @@ void SLinkedList<T>::InsertFront(T item)
 template <class T>
 void SLinkedList<T>::InsertBack(T item)
 {
+	//instantiate a node.
 	Node<T> * newNode = new Node<T>(item);
 
+	//put the node into place and increment.
 	if (size == 0)
 	{
 		front = newNode;
-		back = newNode;
 	}
 	else
 	{
 		back->next = newNode;
-		back = newNode;
 	}
+	back = newNode;
 	size++;
 }
 
@@ -161,15 +145,20 @@ bool SLinkedList<T>::Remove(T item)
 {
 	//by the time we're here, the hashing is complete.  Search within the linked list for our item.
 
+	//if the list does not contain this item, there's nothing to remove.
 	if (!Contains(item))
 	{
 		return false;
 	}
 
 	//item exists, remove it.
+
+	//two pointers to the node previous to the one we want to remove, and the one we want to remove
 	Node<T> * temp = front;
 	Node<T> * prev = NULL;
 	size--;
+
+	//loop through the linked list.
 	while (temp != NULL)
 	{
 		//item has been found
@@ -184,7 +173,6 @@ bool SLinkedList<T>::Remove(T item)
 			//if the next value is null, we're at the end of the list.
 			else if (temp->next == NULL)
 			{
-				
 				back = prev;
 				back->next = NULL;
 			}
@@ -199,8 +187,7 @@ bool SLinkedList<T>::Remove(T item)
 		prev = temp;
 		temp = temp->next;
 	}
-	//we should never get here.  Getting here means the item exists but we somehow didnt find it.
-	bool bad = true;
+	//we should never get here.  Getting here means the item exists but we somehow didnt find and remove it - we have to re-increment and return false.
 	size++;
 	return false;
 }
@@ -209,10 +196,13 @@ bool SLinkedList<T>::Remove(T item)
 template <class T>
 void SLinkedList<T>::RemoveAll()
 {
+	//if there is nothing in the list, return.
 	if (front == NULL)
 	{
 		return;
 	}
+
+	//iteratively delete the list.
 	Node<T> * cur = front;
 	Node<T> * temp = front->next;
 	while (size > 0)
@@ -242,11 +232,11 @@ int SLinkedList<T>::Size() const
 template <class T>
 bool SLinkedList<T>::IsEmpty() const
 {
-	if (size > 0)
+	if (front == NULL)
 	{
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 // Returns existence of item
@@ -283,7 +273,7 @@ T* SLinkedList<T>::Retrieve(T item)
 		return NULL;
 	}
 
-	//item exists, remove it.
+	//item exists, go get it.
 	Node<T> * temp = front;
 	while (temp != NULL)
 	{
@@ -294,7 +284,7 @@ T* SLinkedList<T>::Retrieve(T item)
 		}
 		temp = temp->next;
 	}
-	//we should never rach this point.
+	//we should never reach this point.
 	return NULL;
 }
 
@@ -302,6 +292,7 @@ T* SLinkedList<T>::Retrieve(T item)
 template <class T>
 vector<T> SLinkedList<T>::Dump() const
 {
+	//create a vector, push all values into it.
 	vector<T> retvec;
 	Node<T> * cur = front;
 
@@ -310,7 +301,6 @@ vector<T> SLinkedList<T>::Dump() const
 		retvec.push_back(cur->data);
 		cur = cur->next;
 	}
-
 	return retvec;
 }
 

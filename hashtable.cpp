@@ -5,6 +5,7 @@
 //              must include hashtableprivate.h file for additional private member functions added by student
 //Principal coding on March 26th-27th, 2016.
 //Final fixes to Insertion and resize on April 2nd-3rd 2016.
+//Final Commenting on April 3rd, 2016
 
 #pragma once
 
@@ -31,7 +32,7 @@ HashTable::HashTable()
 {
 	size = 0;
 	maxsize = 101;	//by default, maxsize = the smallest prime greater than 2*n (n=101).
-	table = new SLinkedList<UserAccount>[101];
+	table = new SLinkedList<UserAccount>[maxsize];
 }
 
 // parameterized constructor
@@ -47,13 +48,12 @@ HashTable::HashTable(int n)
 // Creates deep copy of sourceht
 HashTable::HashTable(const HashTable& sourceht)
 {
-	size = sourceht.size;	//get size, maxsize.
-	maxsize = sourceht.maxsize;
+	size = sourceht.Size();	//get size, maxsize.
+	maxsize = sourceht.MaxSize();
 	table = new SLinkedList<UserAccount>[maxsize];//create an array of the same size.
 	SLinkedList<UserAccount> *curList;
+
 	//fill this table with values from sourceht.
-
-
 	for (int i = 0; i < maxsize; i++)
 	{
 		curList = &sourceht.table[i];
@@ -73,7 +73,7 @@ int HashTable::Hash(string input) const
 		//hashval = itself + the ascii - ascii conversion * horner conversion % arraysize.
 		hashval = (hashval + ((input[i] - 96) * 32));
 	}
-
+	//finally, mod the hashval.
 	return hashval % maxsize;
 }
 
@@ -86,7 +86,7 @@ int HashTable::SmallestPrime(int n) const
 	//edge cases - these must be here to make our search more efficient, and to cut out even checks.
 	if (n == 0 || n == 1 || n == 2)
 	{
-		return n+1;
+		return nextPrime;
 	}
 
 	//if we're on an even number, increment it so that it's odd (no evens are primes but '2').
@@ -97,7 +97,7 @@ int HashTable::SmallestPrime(int n) const
 
 	while (!IsPrime(nextPrime))
 	{
-		//increment nextprime by 2
+		//increment nextprime by 2, ensuring we only check odd values.
 		nextPrime += 2;
 	}
 	return nextPrime;
@@ -128,7 +128,7 @@ bool HashTable::IsPrime(int n) const
 	//this second value would have to be less than or equal to sqrt(n), otherwise the product would be larger than n.
 	//as a result, this value must have already been checked, and therefore does not exist (since we would have left the loop if it did).
 	//This means we can get away with checking only values up to the square root of n + 1 
-	//(the + 1to take care of potential rounding errors).
+	//(the + 1 exists to take care of potential rounding errors).
 	for (int i = 6; i < sqrt(n) + 1; i+=6)
 	{
 		if ((n % (i - 1) == 0) || (n % (i + 1) == 0))
@@ -145,6 +145,7 @@ bool HashTable::IsPrime(int n) const
 //   and re-hash all contents into the new array, delete the old array and return true.
 bool HashTable::Resize(int n)
 {
+	//filter out invalid values
 	if (n < maxsize || n < 0)
 	{
 		return false;
@@ -157,22 +158,28 @@ bool HashTable::Resize(int n)
 	for (int i = 0; i < size; i++)
 	{
 		//dump each linked list and write its contents to the new hash table.
-
 		if ((table[i]).Size() > 0)	//if list's size is greater than 0, enter the while.
 		{
 			temp = table[i].Dump();	//point vector in the right direction.
 			//for all values in this linked list, insert each value into our new hash table.
 			for (int j = 0; j < (signed)temp.size(); j++)
 			{
-				//UserAccount * user = new UserAccount(temp.at(j));
 				nuHash->Insert(temp.at(j));
 			}
 		}
 	}
-	//all values have been migrated at this point.
+	//all values have been migrated at this point.  Reassign the table.
+	SLinkedList<UserAccount>* oldtable = table;
 	table = nuHash->table;
+
+	//dealloc the old table.
+	for (int i = 0; i < maxsize; i++)
+	{
+		oldtable[i].RemoveAll();
+	}
+
+	//reassign maxsize to the new maxsize.
 	maxsize = nuHash->maxsize;
-	
 	return true;
 }
 
@@ -224,13 +231,12 @@ bool HashTable::Insert(UserAccount acct)
 		newUser->SetPassword(acct.GetPassword(), acct.GetPassword());
 		newUser->SetUserLevel(acct.GetUserLevel());
 
+		//insert it.
 		table[unamehash].InsertBack(*newUser);
-
 		size++;
 		return true;
 	}
 	return false;
-
 }
 
 // Removal
@@ -256,7 +262,6 @@ bool HashTable::Search(UserAccount acct) const
 {
 	//call hash and get the hash value of the username.
 	int unamehash = Hash(acct.GetUsername());
-
 	bool containsval = table[unamehash].Contains(acct);
 	return containsval;
 }
